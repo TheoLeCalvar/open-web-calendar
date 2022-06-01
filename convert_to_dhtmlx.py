@@ -29,7 +29,7 @@ class ConvertToDhtmlx(ConversionStrategy):
         date = date.astimezone(datetime.timezone.utc)
         return date.strftime("%Y-%m-%d %H:%M")
 
-    def convert_ical_event(self, calendar_event):
+    def convert_ical_event(self, calendar_event, default_color = ""):
         start = calendar_event["DTSTART"].dt
         end = calendar_event.get("DTEND", calendar_event["DTSTART"]).dt
         geo = calendar_event.get("GEO", None)
@@ -57,7 +57,7 @@ class ConvertToDhtmlx(ConversionStrategy):
             "url": calendar_event.get("URL"),
             "id": (uid, start_date),
             "type": "event",
-            "color": calendar_event.get("X-APPLE-CALENDAR-COLOR", "")
+            "color": calendar_event.get("X-APPLE-CALENDAR-COLOR", default_color)
         }
 
     def convert_error(self, error, url, tb_s):
@@ -98,7 +98,7 @@ class ConvertToDhtmlx(ConversionStrategy):
             events = recurring_ical_events.of(calendar).between(one_year_before, one_year_ahead)
             with self.lock:
                 for event in events:
-                    json_event = self.convert_ical_event(event)
+                    json_event = self.convert_ical_event(event, calendar.get("X-APPLE-CALENDAR-COLOR", ""))
                     self.components.append(json_event)
                 
 
